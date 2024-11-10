@@ -1,0 +1,111 @@
+/* Chat message styling */
+#chatbox {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    padding: 15px;
+}
+
+.user-message {
+    margin: 3% 0;
+    background-color: #4caf50;
+    color: white;
+    border-radius: 10px;
+    align-self: flex-end;
+    padding: 10px;
+    max-width: 100%;
+    word-wrap: break-word;
+}
+
+.llama-message {
+    margin: 3% 0;
+    background-color: #f1f1f1;
+    color: #333;
+    border-radius: 10px;
+    align-self: flex-start;
+    padding: 10px;
+    max-width: 100%;
+    word-wrap: break-word;
+}
+
+/* Greeting and error message styling */
+.greeting-message, .error-message {
+    text-align: center;
+    font-size: 1.1em;
+    margin: 15px 0;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.greeting-message {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.user-message i, .llama-message i {
+    margin-right: 5px;
+}
+
+.typing {
+    color: #888;
+    font-style: italic;
+    margin-bottom: 10px;
+}
+
+pre {
+    position: relative;
+}
+
+code {
+    color: #6c757d;
+    padding: 3px;
+}
+
+pre code {
+    background-color: #f8f9fa;
+    padding: 10px;
+    display: block;
+    border-radius: 5px;
+    font-size: 0.9em;
+    overflow-x: auto;
+}
+
+.copy-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    color: #6c757d;
+    font-size: 1.2em;
+    transition: color 0.2s ease;
+}
+
+.copy-icon:hover {
+    color: #4caf50;
+}
+
+.copy-success {
+    color: #28a745 !important;
+}
+
+.input-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.model-select {
+    width: 25%;
+}
+
+#userInput:disabled,
+#modelType:disabled,
+#sendButton:disabled {
+    pointer-events: auto !important;
+    cursor: not-allowed !important;
+}

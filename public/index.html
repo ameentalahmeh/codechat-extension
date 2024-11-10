@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Chat</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="d-flex flex-column vh-100 bg-light">
+    <div class="container text-center my-4">
+        <h2>Coding Chat with AI</h2>
+    </div>
+    <div id="chatbox" class="container d-flex flex-column"></div>
+    <div class="container my-3 d-flex justify-content-center">
+        <div class="input-container">
+            <select id="modelType" class="form-control model-select">
+                <option value="">Model</option>
+                <option value="meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo">Llama-3.2-11B</option>
+                <option value="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo">Meta-Llama-3.1-8B</option>
+                <option value="codellama/CodeLlama-34b-Instruct-hf">CodeLlama-34b</option>
+            </select>
+            <input type="text" id="userInput" class="form-control mr-2" placeholder="E.g. How to build NodeJs API?"
+                style="width: 60%;" oninput="toggleSendButton()">
+            <button id="sendButton" class="btn btn-success" onclick="sendMessage()" disabled>Send</button>
+        </div>
+    </div>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@latest/marked.min.js"></script>
+    <script>
+        const vscode = acquireVsCodeApi();
+
+        function appendMessage(message, type) {
+            const messageElement = document.createElement('div');
+            if (type === 'user') {
+                messageElement.className = 'user-message';
+                messageElement.innerHTML = '<i class="fas fa-user"></i>' + '&nbsp;' + message;
+            } else if (type === 'llama') {
+                messageElement.className = 'llama-message';
+                messageElement.innerHTML = '<i class="fas fa-robot"></i>' + '&nbsp;' + "AI says:<br><br>" + message;
+            } else if (type === 'greeting') {
+                messageElement.className = 'greeting-message';
+                messageElement.innerHTML = '<i class="fas fa-robot"></i>' + '&nbsp;' + message;
+            } else if (type === 'error') {
+                messageElement.className = 'error-message';
+                messageElement.innerHTML = '<i class="fas fa-robot"></i>' + '&nbsp;' + message;
+            }
+            document.getElementById('chatbox').appendChild(messageElement);
+            document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
+            addCopyIcons();
+        }
+
+        function showTypingEffect() {
+            const typingElement = document.createElement('div');
+            typingElement.className = 'typing';
+            typingElement.innerHTML = '<i class="fas fa-robot"></i>' + '&nbsp;' + "AI is typing...";
+            document.getElementById('chatbox').appendChild(typingElement);
+            document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
+            return typingElement;
+        }
+
+        function sendMessage() {
+            const userInput = document.getElementById('userInput').value;
+            const modelType = document.getElementById('modelType').value;
+            if (userInput.trim()) {
+                appendMessage(userInput, 'user');
+                document.getElementById('sendButton').disabled = true;
+                document.getElementById('userInput').disabled = true;
+                document.getElementById('modelType').disabled = true;
+                const typingEffect = showTypingEffect();
+                vscode.postMessage({ command: 'startChat', text: userInput, model: modelType });
+                document.getElementById('userInput').value = '';
+            }
+        }
+
+        function addCopyIcons() {
+            // Wait until chat content has been added to the DOM
+            const chatbox = document.getElementById('chatbox');
+
+            // Mutation observer to catch newly added messages with code blocks
+            const observer = new MutationObserver(() => {
+                document.querySelectorAll('pre code').forEach((codeBlock) => {
+                    // Check if the copy icon already existsk
+                    if (!codeBlock.previousElementSibling || !codeBlock.previousElementSibling.classList.contains('copy-icon')) {
+                        const copyIcon = document.createElement('i');
+                        copyIcon.className = 'fas fa-copy copy-icon';
+
+                        copyIcon.addEventListener('click', () => {
+                            navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+                                copyIcon.classList.add('copy-success');
+                                setTimeout(() => {
+                                    copyIcon.classList.remove('copy-success');
+                                }, 2000);
+                            }).catch((err) => {
+                                console.error('Failed to copy: ', err);
+                            });
+                        });
+
+                        codeBlock.parentNode.insertBefore(copyIcon, codeBlock);
+                    }
+                });
+            });
+
+            // Observer configuration: watch for child elements being added
+            observer.observe(chatbox, {
+                childList: true,
+                subtree: true
+            });
+        }
+
+        function toggleSendButton() {
+            const userInput = document.getElementById('userInput').value.trim();
+            const sendButton = document.getElementById('sendButton');
+            sendButton.disabled = !userInput || userInput == '';
+        }
+
+        function loadChatBox() {
+            appendMessage("Welcome! Please enter a question to get started.", 'greeting');
+            addCopyIcons();
+            toggleSendButton();
+        }
+
+        window.addEventListener('message', event => {
+            const message = event.data;
+            const { command, text, error } = message;
+            if (command === 'response') {
+                const typingElement = document.querySelector('.typing');
+                if (typingElement) typingElement.remove();
+                if (error) {
+                    appendMessage(error, 'error');
+                } else {
+                    const html = marked.parse(text);
+                    appendMessage(html, 'llama');
+                }
+                document.getElementById('sendButton').disabled = false;
+                document.getElementById('userInput').disabled = false;
+                document.getElementById('modelType').disabled = false;
+                toggleSendButton();
+            }
+        });
+
+        loadChatBox();
+
+    </script>
+
+</body>
+
+</html>

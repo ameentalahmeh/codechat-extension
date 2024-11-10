@@ -1,34 +1,27 @@
-/* eslint-disable no-unused-vars */
 const vscode = require('vscode');
 const { queryLlama, renderWebviewContent } = require('./helpers');
 
 // Sidebar Webview provider class
 class CodeChatSidebarProvider {
-    resolveWebviewView(webviewView, context, token) {
+    resolveWebviewView(webviewView) {
         webviewView.webview.options = { enableScripts: true };
         webviewView.webview.html = renderWebviewContent();
 
         // Listen for messages from the Webview
         webviewView.webview.onDidReceiveMessage(async (message) => {
             if (message.command === 'startChat') {
-                const userInput = message.text;
+                try {
+                    const userInput = message.text;
 
-                // Check if input is valid
-                if (userInput.trim()) {
-                    try {
-                        // Process the input (e.g., send to queryLlama)
-                        const response = await queryLlama(userInput);
+                    // Process the input (e.g., send to queryLlama)
+                    const response = await queryLlama(userInput);
 
-                        // Send the response back to the Webview
-                        webviewView.webview.postMessage({ command: 'response', text: response });
-                    } catch (error) {
-                        // Handle any errors and send error message to Webview
-                        console.error(error);
-                        webviewView.webview.postMessage({ command: 'response', text: "Error: Could not process your question." });
-                    }
-                } else {
-                    // Send validation message if input is empty
-                    webviewView.webview.postMessage({ command: 'response', text: "Please enter a question!" });
+                    // Send the response back to the Webview
+                    webviewView.webview.postMessage({ command: 'response', text: response });
+                } catch ({ message: errMsg }) {
+                    // Handle any errors and send error message to Webview
+                    vscode.window.showErrorMessage(errMsg);
+                    webviewView.webview.postMessage({ command: 'response', error: errMsg });
                 }
             }
         });
