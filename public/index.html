@@ -80,34 +80,37 @@
             // Wait until chat content has been added to the DOM
             const chatbox = document.getElementById('chatbox');
 
-            // Mutation observer to catch newly added messages with code blocks
-            const observer = new MutationObserver(() => {
-                document.querySelectorAll('pre code').forEach((codeBlock) => {
-                    // Check if the copy icon already existsk
-                    if (!codeBlock.previousElementSibling || !codeBlock.previousElementSibling.classList.contains('copy-icon')) {
-                        const copyIcon = document.createElement('i');
-                        copyIcon.className = 'fas fa-copy copy-icon';
+            // Catch newly added messages with code blocks
+            document.querySelectorAll('pre code').forEach((codeBlock) => {
+                if (!codeBlock.previousElementSibling || !codeBlock.previousElementSibling.classList.contains('copy-icon')) {
+                    const copyIconDiv = document.createElement('div');
+                    copyIconDiv.classList.add('copy-code-div');
 
-                        copyIcon.addEventListener('click', () => {
-                            navigator.clipboard.writeText(codeBlock.textContent).then(() => {
-                                copyIcon.classList.add('copy-success');
-                                setTimeout(() => {
-                                    copyIcon.classList.remove('copy-success');
-                                }, 2000);
-                            }).catch((err) => {
-                                console.error('Failed to copy: ', err);
-                            });
+                    const copyIcon = document.createElement('i');
+                    copyIcon.className = 'fa fa-copy';
+
+                    const copyMessage = document.createElement('span');
+                    copyMessage.textContent = 'Copy';
+
+                    copyIconDiv.appendChild(copyIcon);
+                    copyIconDiv.appendChild(copyMessage);
+
+                    copyIconDiv.addEventListener('click', () => {
+                        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+                            copyMessage.textContent = 'Copied';
+                            copyIcon.classList.replace('fa-copy', 'fa-check');
+
+                            setTimeout(() => {
+                                copyIcon.classList.replace('fa-check', 'fa-copy');
+                                copyMessage.textContent = 'Copy';
+                            }, 2000);
+                        }).catch((err) => {
+                            console.error('Failed to copy: ', err);
                         });
+                    });
 
-                        codeBlock.parentNode.insertBefore(copyIcon, codeBlock);
-                    }
-                });
-            });
-
-            // Observer configuration: watch for child elements being added
-            observer.observe(chatbox, {
-                childList: true,
-                subtree: true
+                    codeBlock.parentNode.insertBefore(copyIconDiv, codeBlock);
+                }
             });
         }
 

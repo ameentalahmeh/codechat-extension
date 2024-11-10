@@ -75,22 +75,22 @@ pre code {
     overflow-x: auto;
 }
 
-.copy-icon {
+/* Container for the copy button and message */
+.copy-code-div {
+    background-color: #d8d3d35c;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 12px;
+    color: #333;
     position: absolute;
-    top: 10px;
+    top: 5px;
     right: 10px;
+    z-index: 0;
+}
+
+/* Hover effect for the entire div */
+.copy-code-div:hover {
     cursor: pointer;
-    color: #6c757d;
-    font-size: 1.2em;
-    transition: color 0.2s ease;
-}
-
-.copy-icon:hover {
-    color: #4caf50;
-}
-
-.copy-success {
-    color: #28a745 !important;
 }
 
 .input-container {
