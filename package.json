@@ -2,7 +2,7 @@
   "name": "codechat",
   "displayName": "Code Chat",
   "description": "A VS Code extension to help developers with development using Llama AI, supporting native language prompts.",
-  "icon": "images/codechat-icon.png",
+  "icon": "assets/icons/codechat-icon.png",
   "version": "0.0.1",
   "publisher": "CodeChat",
   "engines": {
@@ -31,7 +31,7 @@
         {
           "id": "codechat-sidebar-view",
           "title": "Code Chat",
-          "icon": "images/codechat-icon.svg"
+          "icon": "assets/icons/codechat-icon-gray.png"
         }
       ]
     },
