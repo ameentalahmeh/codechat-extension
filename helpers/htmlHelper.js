@@ -1,6 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 
+const chatsFilePath = path.join(__dirname, '..', 'chats.json');
+
+// Render sidebar view
 function renderWebviewContent() {
     // Specify the path to your HTML file
     const basePath = path.join(__dirname, '..', 'public/');
@@ -19,4 +22,26 @@ function renderWebviewContent() {
     return fullHtmlContent;
 }
 
-module.exports = renderWebviewContent;
+
+// Save chat to chats.json, replacing existing chat if it exists
+function saveChatToFile(chat) {
+    const chats = loadChats(); 
+    const existingChatIndex = chats.findIndex(c => c.id === chat.id);
+    if (existingChatIndex !== -1) {
+        chats[existingChatIndex] = chat;
+    } else {
+        chats.push(chat);
+    }
+    fs.writeFileSync(chatsFilePath, JSON.stringify(chats, null, 2));
+}
+
+// Load chats from chats.json
+function loadChats() {
+    if (fs.existsSync(chatsFilePath)) {
+        const data = fs.readFileSync(chatsFilePath, 'utf-8');
+        return JSON.parse(data);
+    }
+    return [];
+}
+
+module.exports = { renderWebviewContent, saveChatToFile, loadChats };

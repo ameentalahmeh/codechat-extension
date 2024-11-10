@@ -1,5 +1,5 @@
 const vscode = require('vscode');
-const { queryLlama, renderWebviewContent } = require('./helpers');
+const { queryLlama, renderWebviewContent, saveChatToFile, loadChats } = require('./helpers');
 
 // Sidebar Webview provider class
 class CodeChatSidebarProvider {
@@ -9,7 +9,8 @@ class CodeChatSidebarProvider {
 
         // Listen for messages from the Webview
         webviewView.webview.onDidReceiveMessage(async (message) => {
-            if (message.command === 'startChat') {
+            const { command, chat } = message;
+            if (command === 'startChat') {
                 try {
                     const { text, model, history } = message;
 
@@ -31,6 +32,11 @@ class CodeChatSidebarProvider {
                     vscode.window.showErrorMessage(errMsg);
                     webviewView.webview.postMessage({ command: 'response', error: errMsg });
                 }
+            } else if (command === 'saveChat') {
+                saveChatToFile(chat);
+            } else if (command === 'loadChats') {
+                const chats = loadChats();
+                webviewView.webview.postMessage({ command: 'chatsLoaded', chats });
             }
         });
     }
@@ -61,3 +67,4 @@ module.exports = {
     activate,
     deactivate
 };
+

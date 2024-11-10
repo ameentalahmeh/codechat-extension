@@ -1,5 +1,18 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+input[type="text"], .model-select {
+    width: 300px;
+}
+
+button {
+    margin-left: 10px;
+}
+
 /* Chat message styling */
 #chatbox {
+    display: flex;
     flex-grow: 1;
     overflow-y: auto;
     margin-bottom: 10px;
@@ -103,9 +116,24 @@ pre code {
     width: 25%;
 }
 
-#userInput:disabled,
-#modelType:disabled,
-#sendButton:disabled {
+#user-input:disabled,
+#model-type:disabled,
+#send-button:disabled {
     pointer-events: auto !important;
     cursor: not-allowed !important;
+}
+
+#chatlist {
+    display: none;
+}
+
+.chat-item {
+    padding: 8px 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+.chat-item:hover {
+    background-color: #f0f0f0;
 }

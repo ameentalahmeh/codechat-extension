@@ -25,28 +25,36 @@
         </button>
     </div>
 
-    <div id="chatbox" class="container d-flex flex-column"></div>
+    <div id="chatbox" class="container flex-column"></div>
 
     <div class="container my-3 d-flex justify-content-center">
         <div class="input-container">
-            <select id="modelType" class="form-control model-select">
+            <select id="model-type" class="form-control model-select">
                 <option value="">Model</option>
                 <option value="meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo">Llama-3.2-11B</option>
                 <option value="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo">Meta-Llama-3.1-8B</option>
                 <option value="codellama/CodeLlama-34b-Instruct-hf">CodeLlama-34b</option>
             </select>
-            <input type="text" id="userInput" class="form-control mr-2" placeholder="E.g. How to build NodeJs API?"
+            <input type="text" id="user-input" class="form-control mr-2" placeholder="E.g. How to build NodeJs API?"
                 style="width: 60%;" oninput="toggleSendButton()">
-            <button id="sendButton" class="btn btn-success" onclick="sendMessage()" disabled>Send</button>
+            <button id="send-button" class="btn btn-success" onclick="sendMessage()" disabled>Send</button>
         </div>
+    </div>
+
+    <!-- Chat list container -->
+    <div id="chatlist" class="container mt-3">
+        <!-- Chat list will be dynamically inserted here -->
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/marked@latest/marked.min.js"></script>
     <script>
         const vscode = acquireVsCodeApi();
         let conversationHistory = [];
+        let selectedChatId = null;
+        let pastChats = [];
 
-        function appendMessage(message, type) {
+        // Function to append a new message
+        function appendMessage(message, type, addToHistory = false) {
             const messageElement = document.createElement('div');
             if (type === 'user') {
                 messageElement.className = 'user-message';
@@ -66,28 +74,19 @@
             addCopyIcons();
 
             // Add message to history
-            if (['user', 'system'].includes(type)) {
+            if (addToHistory) {
                 conversationHistory.push({ content: message, role: type });
             }
         }
 
-        function showTypingEffect() {
-            const typingElement = document.createElement('div');
-            typingElement.className = 'typing';
-            typingElement.innerHTML = '<i class="fas fa-robot"></i>' + '&nbsp;' + "AI is typing...";
-            document.getElementById('chatbox').appendChild(typingElement);
-            document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
-            return typingElement;
-        }
-
         function sendMessage() {
-            const userInput = document.getElementById('userInput').value;
-            const modelType = document.getElementById('modelType').value;
+            const userInput = document.getElementById('user-input').value;
+            const modelType = document.getElementById('model-type').value;
             if (userInput.trim()) {
-                appendMessage(userInput, 'user');
-                document.getElementById('sendButton').disabled = true;
-                document.getElementById('userInput').disabled = true;
-                document.getElementById('modelType').disabled = true;
+                appendMessage(userInput, 'user', true);
+                document.getElementById('send-button').disabled = true;
+                document.getElementById('user-input').disabled = true;
+                document.getElementById('model-type').disabled = true;
                 const typingEffect = showTypingEffect();
 
                 // Send entire conversation history with the request
@@ -98,8 +97,17 @@
                     history: conversationHistory,
                 });
 
-                document.getElementById('userInput').value = '';
+                document.getElementById('user-input').value = '';
             }
+        }
+
+        function showTypingEffect() {
+            const typingElement = document.createElement('div');
+            typingElement.className = 'typing';
+            typingElement.innerHTML = '<i class="fas fa-robot"></i>' + '&nbsp;' + "AI is typing...";
+            document.getElementById('chatbox').appendChild(typingElement);
+            document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
+            return typingElement;
         }
 
         function addCopyIcons() {
@@ -141,43 +149,109 @@
         }
 
         function toggleSendButton() {
-            const userInput = document.getElementById('userInput').value.trim();
-            const sendButton = document.getElementById('sendButton');
+            const userInput = document.getElementById('user-input').value.trim();
+            const sendButton = document.getElementById('send-button');
             sendButton.disabled = !userInput || userInput == '';
         }
 
-        function loadChatBox() {
-            appendMessage("Welcome! Please enter a question to get started.", 'greeting');
+        function loadChatBox(greeting = false) {
+            appendMessage(greeting || "Welcome! Please enter a question to get started.", 'greeting');
             addCopyIcons();
             toggleSendButton();
         }
 
+        function cleanViewContent(tab) {
+            switch (tab) {
+                case 'chat':
+                    document.getElementById('chatbox').innerHTML = '';
+                    document.getElementById('chatbox').style.display = 'flex';
+                    document.getElementById('chatlist').style.display = 'none';
+                    document.querySelector('.input-container').style.display = 'flex';
+                    break;
+                case 'history':
+                    document.getElementById('chatbox').style.display = 'none';
+                    document.getElementById('chatlist').style.display = 'flex';
+                    document.querySelector('.input-container').style.display = 'none';
+            }
+        }
+
+        function loadChat(chatId) {
+            const selectedChat = pastChats.find(chat => chat.id === chatId);
+            if (selectedChat) {
+                conversationHistory = selectedChat.history;
+                selectedChatId = chatId;
+                cleanViewContent('chat');
+                conversationHistory.forEach(msg => appendMessage(msg.content, msg.role));
+            }
+        }
+
+        function displayChatList(chats) {
+            const chatlist = document.getElementById('chatlist');
+            chatlist.innerHTML = '';
+
+            chats.forEach(chat => {
+                const chatItem = document.createElement('div');
+                chatItem.className = 'chat-item';
+                chatItem.textContent = chat.title;
+                chatItem.addEventListener('click', () => {
+                    loadChat(chat.id);
+                    chatlist.style.display = 'none';
+                });
+                chatlist.appendChild(chatItem);
+            });
+
+            chatlist.style.display = 'block';
+        }
+
+        function updateChats() {
+            if (conversationHistory.length > 0) {
+                const chatTitle = conversationHistory[0].content || "Untitled Chat";
+                const chatId = selectedChatId || crypto.randomUUID();
+                const chatData = {
+                    id: chatId,
+                    title: chatTitle,
+                    history: conversationHistory
+                };
+                vscode.postMessage({ command: 'saveChat', chat: chatData });
+            }
+        }
+
         function showHistory() {
-            alert(JSON.stringify(conversationHistory, null, 2));
+            updateChats();
+            cleanViewContent('history');
+            vscode.postMessage({ command: 'loadChats' });
         }
 
         function startNewConversation() {
+            updateChats();
+
             conversationHistory = [];
-            document.getElementById('chatbox').innerHTML = '';
+            cleanViewContent('chat');
             loadChatBox();
         }
 
-        window.addEventListener('message', event => {
+        window.addEventListener('message', (event) => {
             const message = event.data;
-            const { command, text, error } = message;
-            if (command === 'response') {
-                const typingElement = document.querySelector('.typing');
-                if (typingElement) typingElement.remove();
-                if (error) {
-                    appendMessage(error, 'error');
-                } else {
-                    const html = marked.parse(text);
-                    appendMessage(html, 'system');
-                }
-                document.getElementById('sendButton').disabled = false;
-                document.getElementById('userInput').disabled = false;
-                document.getElementById('modelType').disabled = false;
-                toggleSendButton();
+            const { command, text, chats, error } = message;
+            switch (message.command) {
+                case 'response':
+                    const typingElement = document.querySelector('.typing');
+                    if (typingElement) typingElement.remove();
+                    if (error) {
+                        appendMessage(error, 'error');
+                    } else {
+                        const html = marked.parse(text);
+                        appendMessage(html, 'system', true);
+                    }
+                    document.getElementById('send-button').disabled = false;
+                    document.getElementById('user-input').disabled = false;
+                    document.getElementById('model-type').disabled = false;
+                    toggleSendButton();
+                    break;
+                case 'chatsLoaded':
+                    pastChats = chats || [];
+                    displayChatList(pastChats);
+                    break;
             }
         });
 
