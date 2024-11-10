@@ -2,15 +2,13 @@
 
 Code Chat is a Visual Studio Code extension designed to enhance the developer experience by integrating an AI-powered assistant directly into the editor. Built with Llama AI, Code Chat allows developers to use their native language to ask questions and receive intelligent, context-aware responses. This extension supports both code-related queries and general programming assistance, streamlining the coding workflow by keeping everything within VS Code.
 
----
-
 ## Features
 
 - **Native Language Support**: Interact with the AI in your preferred language, and Code Chat will respond in kind.
-- **Multiple AI Models**: Choose from a selection of powerful Llama models, such as:
-  - Llama-3.2-11B for extensive knowledge and versatility
-  - Meta-Llama-3.1-8B for optimal speed
-  - CodeLlama-34b for code-specific support
+- **Multiple AI Models**: Select from a range of powerful Llama models integrated with **TogetherAI**, including:
+  - **Llama-3.2-11B** for comprehensive knowledge and versatility
+  - **Meta-Llama-3.1-8B** for faster performance
+  - **CodeLlama-34B** for enhanced code-specific support
 - **Chat History**: Keep track of past conversations for easy reference.
 - **Interactive Sidebar**: Code Chat appears as a sidebar where you can initiate chats, review history, and access saved conversations.
 - **Copy Code Functionality**: Easily copy AI-generated code snippets to your clipboard for quick integration.
@@ -59,25 +57,31 @@ Alternatively, you can install it from the VSIX file if available.
 
 To run and test the extension locally in Visual Studio Code:
 
-1. **Install Dependencies**:
+1. **Clone the Repository**:
+   
+   ```bash
+   git clone https://github.com/ameentalahmeh/codechat
+   cd codechat
+   ```
+
+2. **Install Dependencies**:
    - Open the project folder in VS Code.
    - Run the following command in the terminal to install required dependencies:
+
      ```bash
      npm install
      ```
 
-2. **Start the Code Chat Server**:
-   - Ensure the Code Chat server is running and accessible. This is essential for the extension to process queries and receive responses from the models.
+3. **Start the Code Chat Server**:
+   - Ensure the Code Chat server is running and accessible, as it is needed to process queries and provide model responses.
 
-3. **Run in Debug Mode**:
-   - Press `F5` to launch the extension in a new VS Code Extension Development Host window. This allows you to run and debug the extension as if it were installed.
+4. **Run in Debug Mode**:
+   - Press `F5` to launch the extension in a new VS Code Extension Development Host window for debugging.
 
-4. **Test the Extension**:
-   - In the development host window, activate the extension's features by using its commands or navigating to the sidebar where the extension’s UI appears.
-   - Interact with the chat input, model selection, and other UI elements to verify the functionality.
+5. **Test the Extension**:
+   - In the development host window, activate the extension and interact with the UI (e.g., chat input, model selection) to test functionality.
 
-5. **Make Changes and Re-run**:
-   - If you make changes, close the development host window, then press `F5` again in your main VS Code window to relaunch with the updated code.
+6. **Make Changes and Re-run**:
+   - After making changes, close the development host window and press `F5` again to relaunch with the updated code.
 
-Following these steps will ensure the extension is set up correctly, dependencies are installed, and the extension is running with the necessary server support for testing and debugging before deployment.
-
+These steps will set up the extension locally, ensuring all dependencies are installed and the necessary server is running for testing and debugging.
