@@ -60,8 +60,8 @@ To run and test the extension locally in Visual Studio Code:
 1. **Clone the Repository**:
    
    ```bash
-   git clone https://github.com/ameentalahmeh/codechat
-   cd codechat
+   git clone git@github.com:ameentalahmeh/codechat-extension.git
+   cd codechat-extension
    ```
 
 2. **Install Dependencies**:
