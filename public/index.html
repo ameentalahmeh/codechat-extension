@@ -14,7 +14,19 @@
     <div class="container text-center my-4">
         <h2>Coding Chat with AI</h2>
     </div>
+
+    <!-- Icon bar for history and new chat -->
+    <div class="container my-2 d-flex justify-content-end">
+        <button id="historyButton" class="btn btn-outline-secondary mr-2" onclick="showHistory();">
+            <i class="fas fa-history"></i> History
+        </button>
+        <button id="newChatButton" class="btn btn-outline-primary" onclick="startNewConversation();">
+            <i class="fas fa-plus"></i> New Chat
+        </button>
+    </div>
+
     <div id="chatbox" class="container d-flex flex-column"></div>
+
     <div class="container my-3 d-flex justify-content-center">
         <div class="input-container">
             <select id="modelType" class="form-control model-select">
@@ -28,18 +40,19 @@
             <button id="sendButton" class="btn btn-success" onclick="sendMessage()" disabled>Send</button>
         </div>
     </div>
-    <!-- Scripts -->
+
     <script src="https://cdn.jsdelivr.net/npm/marked@latest/marked.min.js"></script>
     <script>
         const vscode = acquireVsCodeApi();
+        let conversationHistory = [];
 
         function appendMessage(message, type) {
             const messageElement = document.createElement('div');
             if (type === 'user') {
                 messageElement.className = 'user-message';
                 messageElement.innerHTML = '<i class="fas fa-user"></i>' + '&nbsp;' + message;
-            } else if (type === 'llama') {
-                messageElement.className = 'llama-message';
+            } else if (type === 'system') {
+                messageElement.className = 'system-message';
                 messageElement.innerHTML = '<i class="fas fa-robot"></i>' + '&nbsp;' + "AI says:<br><br>" + message;
             } else if (type === 'greeting') {
                 messageElement.className = 'greeting-message';
@@ -51,6 +64,11 @@
             document.getElementById('chatbox').appendChild(messageElement);
             document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
             addCopyIcons();
+
+            // Add message to history
+            if (['user', 'system'].includes(type)) {
+                conversationHistory.push({ content: message, role: type });
+            }
         }
 
         function showTypingEffect() {
@@ -71,7 +89,15 @@
                 document.getElementById('userInput').disabled = true;
                 document.getElementById('modelType').disabled = true;
                 const typingEffect = showTypingEffect();
-                vscode.postMessage({ command: 'startChat', text: userInput, model: modelType });
+
+                // Send entire conversation history with the request
+                vscode.postMessage({
+                    command: 'startChat',
+                    text: userInput,
+                    model: modelType,
+                    history: conversationHistory,
+                });
+
                 document.getElementById('userInput').value = '';
             }
         }
@@ -126,6 +152,16 @@
             toggleSendButton();
         }
 
+        function showHistory() {
+            alert(JSON.stringify(conversationHistory, null, 2));
+        }
+
+        function startNewConversation() {
+            conversationHistory = [];
+            document.getElementById('chatbox').innerHTML = '';
+            loadChatBox();
+        }
+
         window.addEventListener('message', event => {
             const message = event.data;
             const { command, text, error } = message;
@@ -136,7 +172,7 @@
                     appendMessage(error, 'error');
                 } else {
                     const html = marked.parse(text);
-                    appendMessage(html, 'llama');
+                    appendMessage(html, 'system');
                 }
                 document.getElementById('sendButton').disabled = false;
                 document.getElementById('userInput').disabled = false;
@@ -145,10 +181,8 @@
             }
         });
 
-        loadChatBox();
-
+        startNewConversation();
     </script>
-
 </body>
 
 </html>

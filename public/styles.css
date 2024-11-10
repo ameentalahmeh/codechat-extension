@@ -17,7 +17,7 @@
     word-wrap: break-word;
 }
 
-.llama-message {
+.system-message {
     margin: 3% 0;
     background-color: #f1f1f1;
     color: #333;
@@ -47,7 +47,7 @@
     color: #721c24;
 }
 
-.user-message i, .llama-message i {
+.user-message i, .system-message i {
     margin-right: 5px;
 }
 

@@ -11,10 +11,18 @@ class CodeChatSidebarProvider {
         webviewView.webview.onDidReceiveMessage(async (message) => {
             if (message.command === 'startChat') {
                 try {
-                    const userInput = message.text;
+                    const { text, model, history } = message;
+
+                    // User query params
+                    let userQuery = { text, history };
+
+                    // Add model to query if it's not empty or undefined
+                    if (model && model.trim()) {
+                        userQuery['model'] = model;
+                    }
 
                     // Process the input (e.g., send to queryLlama)
-                    const response = await queryLlama(userInput);
+                    const response = await queryLlama(userQuery);
 
                     // Send the response back to the Webview
                     webviewView.webview.postMessage({ command: 'response', text: response });
