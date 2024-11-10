@@ -1,4 +1,4 @@
-# Code Chat - README
+# Code Chat
 
 Code Chat is a Visual Studio Code extension designed to enhance the developer experience by integrating an AI-powered assistant directly into the editor. Built with Llama AI, Code Chat allows developers to use their native language to ask questions and receive intelligent, context-aware responses. This extension supports both code-related queries and general programming assistance, streamlining the coding workflow by keeping everything within VS Code.
 
